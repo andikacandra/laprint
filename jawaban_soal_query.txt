@@ -1,0 +1,51 @@
+#field delete digunakan untuk menandai data yang dihapus.
+
+#jawaban soal 2
+SELECT *
+FROM `employee`
+WHERE `delete` IS NULL
+ORDER BY `start_join` ASC
+LIMIT 3;
+
+#jawaban soal 3
+SELECT 
+	e.nik,
+	CONCAT(e.first_name, e.last_name) AS `name`,
+	el.leave_date,
+	el.notes
+FROM `employee_leave` AS el
+JOIN `employee` AS e ON e.id = el.employee
+WHERE el.delete IS NULL
+AND e.delete IS NULL;
+
+#jawaban soal 4
+SELECT 
+	e.nik,
+	CONCAT(e.first_name, e.last_name) AS `name`,
+	el.leave_date,
+	el.notes
+FROM `employee_leave` AS el
+JOIN `employee` AS e ON e.id = el.employee
+WHERE el.employee IN (
+	SELECT employee
+	FROM `employee_leave`
+	WHERE `delete` IS NULL
+	GROUP BY employee
+	HAVING COUNT(employee) > 1
+)
+AND el.delete IS NULL
+AND e.delete IS NULL;
+
+#jawaban soal 5  
+SELECT 
+	e.nik,
+	CONCAT(e.first_name, e.last_name) AS `name`,
+	(
+		SELECT (12 - IFNULL(SUM(long_leave), 0)) AS sum_leave
+		FROM `employee_leave`
+		WHERE employee = e.id
+		AND YEAR(leave_date) = '2021'
+		AND `delete` IS NULL
+	) AS sisa_cuti
+FROM employee AS e
+WHERE e.delete IS NULL;
